@@ -1,0 +1,97 @@
+.game-board {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.player-hand {
+  padding: 20px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  margin: 10px 0;
+}
+
+.player-hand.active {
+  background: #e0f0e0;
+  border: 2px solid #4CAF50;
+}
+
+.cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 10px;
+}
+
+.card {
+  width: 60px;
+  height: 90px;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  position: relative;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  user-select: none;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  transition: all 0.2s ease;
+}
+
+.card.played {
+  cursor: default;
+  box-shadow: none;
+}
+
+.card.played:hover {
+  transform: none;
+}
+
+.waiting-room {
+  text-align: center;
+  padding: 20px;
+}
+
+.play-area {
+  background: #e8e8e8;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.play-area .cards {
+  min-height: 100px;
+  background: #f8f8f8;
+  border-radius: 8px;
+}
+
+.game-over {
+  text-align: center;
+  padding: 20px;
+  background: #f0f0f0;
+  border-radius: 8px;
+  margin: 20px;
+}
+
+.game-over button {
+  margin-top: 15px;
+  padding: 10px 20px;
+  font-size: 16px;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.game-over button:hover {
+  background: #45a049;
+} 
