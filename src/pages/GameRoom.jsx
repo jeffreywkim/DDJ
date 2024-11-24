@@ -12,6 +12,7 @@ function GameRoom() {
   const [currentTurn, setCurrentTurn] = useState(0)
   const [gameStatus, setGameStatus] = useState('waiting') // waiting, dealing, playing, finished
   const [playArea, setPlayArea] = useState([])
+  const [selectedCards, setSelectedCards] = useState([])
   
   // Initialize deck
   const initializeDeck = () => {
@@ -80,30 +81,96 @@ function GameRoom() {
     }
   }
 
-  // Add function to handle playing a card
-  const playCard = (playerIndex, cardIndex) => {
-    // Only allow current player to play
+  // Add helper functions to validate plays
+  const isValidPlay = (cards) => {
+    if (cards.length === 0) return false
+    if (cards.length === 1) return true // single card always valid
+    
+    // Sort cards by value for easier checking
+    const sortedCards = [...cards].sort((a, b) => {
+      const values = {'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'10':10,'J':11,'Q':12,'K':13,'A':14}
+      return values[a.value] - values[b.value]
+    })
+
+    // Check for pair
+    if (cards.length === 2) {
+      return cards[0].value === cards[1].value
+    }
+
+    // Check for triple
+    if (cards.length === 3) {
+      return cards[0].value === cards[1].value && cards[1].value === cards[2].value
+    }
+
+    // Check for royal straight (5+ cards)
+    if (cards.length >= 5) {
+      const isConsecutive = sortedCards.every((card, i) => {
+        if (i === 0) return true
+        const values = {'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'10':10,'J':11,'Q':12,'K':13,'A':14}
+        return values[card.value] === values[sortedCards[i-1].value] + 1
+      })
+      const sameSuit = sortedCards.every(card => card.suit === sortedCards[0].suit)
+      if (isConsecutive && sameSuit) return true
+    }
+
+    // Check for full house
+    if (cards.length === 5) {
+      const valueCounts = {}
+      cards.forEach(card => {
+        valueCounts[card.value] = (valueCounts[card.value] || 0) + 1
+      })
+      const counts = Object.values(valueCounts)
+      return counts.includes(3) && counts.includes(2)
+    }
+
+    return false
+  }
+
+  // Update card selection handling
+  const toggleCardSelection = (playerIndex, cardIndex) => {
     if (playerIndex !== currentTurn) return
 
-    // Get the card being played
-    const player = players[playerIndex]
-    const card = player.hand[cardIndex]
+    const card = players[playerIndex].hand[cardIndex]
+    
+    setSelectedCards(prev => {
+      const isSelected = prev.some(c => c.id === card.id)
+      if (isSelected) {
+        return prev.filter(c => c.id !== card.id)
+      } else {
+        return [...prev, card]
+      }
+    })
+  }
 
-    // Add card to play area
-    setPlayArea(prev => [...prev, card])
+  // Update play card function to handle multiple cards
+  const playCards = () => {
+    if (!isValidPlay(selectedCards)) {
+      alert('Invalid play! Please select a valid combination.')
+      return
+    }
 
-    // Remove card from player's hand
+    // Add selected cards to play area
+    setPlayArea(prev => [...prev, ...selectedCards])
+
+    // Remove played cards from player's hand
     const newPlayers = [...players]
-    newPlayers[playerIndex].hand.splice(cardIndex, 1)
+    selectedCards.forEach(playedCard => {
+      const cardIndex = newPlayers[currentTurn].hand.findIndex(card => card.id === playedCard.id)
+      if (cardIndex !== -1) {
+        newPlayers[currentTurn].hand.splice(cardIndex, 1)
+      }
+    })
+    
     setPlayers(newPlayers)
+    setSelectedCards([]) // Clear selection
 
-    // Check if player has won
-    if (newPlayers[playerIndex].hand.length === 0) {
+    // Check for winner
+    if (newPlayers[currentTurn].hand.length === 0) {
       setGameStatus('finished')
       return
     }
 
-    // Move to next player's turn
+    // Next turn
     setCurrentTurn((currentTurn + 1) % players.length)
   }
 
@@ -188,8 +255,8 @@ function GameRoom() {
                   {player.hand.map((card, cardIndex) => (
                     <div 
                       key={card.id} 
-                      className="card"
-                      onClick={() => playCard(playerIndex, cardIndex)}
+                      className={`card ${selectedCards.some(c => c.id === card.id) ? 'selected' : ''}`}
+                      onClick={() => toggleCardSelection(playerIndex, cardIndex)}
                       style={{ 
                         cursor: currentTurn === playerIndex ? 'pointer' : 'not-allowed',
                         color: getCardDisplay(card).color 
@@ -199,6 +266,11 @@ function GameRoom() {
                     </div>
                   ))}
                 </div>
+                {currentTurn === playerIndex && selectedCards.length > 0 && (
+                  <button onClick={playCards} className="play-button">
+                    Play Selected Cards
+                  </button>
+                )}
               </div>
             ))}
           </div>

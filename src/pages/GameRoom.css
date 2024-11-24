@@ -94,4 +94,24 @@
 
 .game-over button:hover {
   background: #45a049;
+}
+
+.card.selected {
+  transform: translateY(-10px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  border: 2px solid #4CAF50;
+}
+
+.play-button {
+  margin-top: 10px;
+  padding: 8px 16px;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.play-button:hover {
+  background: #45a049;
 } 
